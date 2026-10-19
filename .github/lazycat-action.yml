@@ -56,6 +56,10 @@ stores:
       source: https://github.com/wangwanjie/gately
       source_author: wangwanjie
       support_pc: true
+      screenshot_pc_files:
+        - .github/screenshots/pc-1-overview.png
+        - .github/screenshots/pc-2-ddns.png
+        - .github/screenshots/pc-3-docker.png
   private:
     enabled: true
     skip_if_version_exists: true
