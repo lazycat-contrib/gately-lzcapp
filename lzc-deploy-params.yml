@@ -1,1 +1,20 @@
-params: []
+params:
+    - id: timezone
+      type: string
+      name: "Timezone"
+      description: "IANA timezone for logs, scheduled tasks and certificate renewal, e.g. Asia/Shanghai."
+      default_value: "Asia/Shanghai"
+
+locales:
+    zh:
+        timezone:
+            name: "时区"
+            description: "日志、计划任务与证书续期使用的 IANA 时区，默认北京时间（Asia/Shanghai）。"
+    zh_CN:
+        timezone:
+            name: "时区"
+            description: "日志、计划任务与证书续期使用的 IANA 时区，默认北京时间（Asia/Shanghai）。"
+    en:
+        timezone:
+            name: "Timezone"
+            description: "IANA timezone used for logs, cron jobs and certificate renewal. Defaults to Asia/Shanghai."
