@@ -1,0 +1,36 @@
+application:
+  subdomain: gately
+  multi_instance: false
+  upstreams:
+    - location: /
+      backend: http://gately.cloud.lazycat.app.gately.lzcapp:16680/
+services:
+  gately:
+    # 官方商店交付（delivery.mode=lazycat）时由 Action 转存到懒猫镜像源并改写此行
+    # upstream: ghcr.io/wangwanjie/gately:v0.4.7
+    image: ghcr.io/wangwanjie/gately:v0.4.7
+    # host 网络：端口转发、STUN 穿透、Web 服务需要直接监听宿主机端口
+    network_mode: host
+    environment:
+      - TZ=Asia/Shanghai
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:16680/ >/dev/null || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+    binds:
+      # 配置目录（明文 JSON，含证书私钥 ssl.json，注意备份安全）
+      - /lzcapp/var/gately:/etc/gately
+usage: |
+  Gately 开源网络网关工具集：DDNS、STUN 穿透、端口转发、反向代理、SSL 证书、WAF、Web 终端等，单文件约 22 MB，支持导入 Lucky 配置。
+
+  【首次登录】
+  打开应用域名，账号 admin，初始密码在应用日志里（搜索 initial password），登录后请立即修改密码并开启两步验证。
+
+  【懒猫微服上的差异】
+  - 不挂载 docker.sock：Docker 管理模块在微服上不可用，其余功能正常；需要完整 Docker 管理请用 LightOS 或裸机部署。
+  - host 网络模式：端口转发、STUN 穿透、Web 服务直接监听宿主机端口。
+
+  【数据】
+  配置在 /lzcapp/var/gately（明文 JSON，ssl.json 含证书私钥，备份时注意安全），升级不丢。

@@ -1,0 +1,100 @@
+version: 1
+
+project:
+  root: .
+  build_config: lzc-build.yml
+  package_file: package.yml
+  output: dist/gately.lpk
+  target_arch: amd64
+
+update:
+  strategy: publish
+  allow_downgrade: false
+  version_source:
+    type: image
+    image: gately
+
+build:
+  toolchains: []
+  run_buildscript: false
+
+images:
+  - id: gately
+    target: service
+    service: gately
+    source: ghcr.io/wangwanjie/gately
+    channel: stable
+    tag_regex: "^v?(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$"
+    delivery:
+      # 官方商店要求镜像来自懒猫镜像源：由 Action 转存并改写 manifest 里 gately 服务的 image
+      mode: lazycat
+
+stores:
+  official:
+    enabled: true
+    skip_if_version_exists: true
+    create_if_missing: true
+    changelog_locales: [zh, en]
+    retry:
+      enabled: false
+      max_attempts: 3
+      initial_delay: 2s
+      max_delay: 30s
+    application:
+      language: zh
+      name: Gately
+      brief: 开源网络网关工具集，DDNS/STUN/端口转发/反代/证书/WAF 一体
+      description: |
+        Gately 是一个开源、可审计的网络网关工具集：DDNS（阿里云、Cloudflare、腾讯云、DNSPod、
+        华为云等）、STUN 穿透、端口转发（多目标故障转移、流量统计）、SSL 证书（ACME DNS-01
+        自动签发）、反向代理与 Web 服务（认证、IP 黑白名单、限流、缓存）、WAF（Coraza +
+        OWASP CRS v4）、Web 终端（SSH/Telnet/SFTP）、网络诊断、通知中心、计划任务等，
+        单文件约 22 MB，支持导入 Lucky 配置。
+        懒猫微服包采用 host 网络模式以支持端口转发与 STUN 穿透；因微服容器环境限制，
+        Docker 管理模块不可用，其余功能完整。
+      keywords: 网关,DDNS,STUN,端口转发,反向代理,SSL,WAF
+      source: https://github.com/wangwanjie/gately
+      source_author: wangwanjie
+      support_pc: true
+  private:
+    enabled: true
+    skip_if_version_exists: true
+    name: Gately
+    summary: "Gately 懒猫微服打包：开源网络网关工具集（DDNS/STUN/端口转发/反代/WAF）。"
+
+    delivery:
+      # 官方商店要求镜像来自懒猫镜像源：由 Action 转存并改写 manifest 里 gately 服务的 image
+      mode: lazycat
+
+stores:
+  official:
+    enabled: true
+    skip_if_version_exists: true
+    create_if_missing: true
+    changelog_locales: [zh, en]
+    retry:
+      enabled: false
+      max_attempts: 3
+      initial_delay: 2s
+      max_delay: 30s
+    application:
+      language: zh
+      name: Gately
+      brief: 开源网络网关工具集，DDNS/STUN/端口转发/反代/证书/WAF 一体
+      description: |
+        Gately 是一个开源、可审计的网络网关工具集：DDNS（阿里云、Cloudflare、腾讯云、DNSPod、
+        华为云等）、STUN 穿透、端口转发（多目标故障转移、流量统计）、SSL 证书（ACME DNS-01
+        自动签发）、反向代理与 Web 服务（认证、IP 黑白名单、限流、缓存）、WAF（Coraza +
+        OWASP CRS v4）、Web 终端（SSH/Telnet/SFTP）、网络诊断、通知中心、计划任务等，
+        单文件约 22 MB，支持导入 Lucky 配置。
+        懒猫微服包采用 host 网络模式以支持端口转发与 STUN 穿透；因微服容器环境限制，
+        Docker 管理模块不可用，其余功能完整。
+      keywords: 网关,DDNS,STUN,端口转发,反向代理,SSL,WAF
+      source: https://github.com/wangwanjie/gately
+      source_author: wangwanjie
+      support_pc: true
+  private:
+    enabled: true
+    skip_if_version_exists: true
+    name: Gately
+    summary: "Gately 懒猫微服打包：开源网络网关工具集（DDNS/STUN/端口转发/反代/WAF）。"

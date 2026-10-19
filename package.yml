@@ -1,0 +1,18 @@
+package: cloud.lazycat.app.gately
+version: 0.4.7
+name: Gately
+description: "Open-source network gateway toolkit: DDNS, STUN traversal, port forwarding, reverse proxy, SSL certs, WAF and more in a single ~22 MB binary."
+min_os_version: "1.5.0"
+homepage: https://github.com/wangwanjie/gately
+author: wangwanjie
+license: Apache-2.0
+locales:
+  zh:
+    name: "Gately"
+    description: "开源网络网关工具集：DDNS、STUN 穿透、端口转发、反向代理、SSL 证书、WAF、Docker 管理、Web 终端等，单文件约 22 MB，支持导入 Lucky 配置。"
+  zh_CN:
+    name: "Gately"
+    description: "开源网络网关工具集：DDNS、STUN 穿透、端口转发、反向代理、SSL 证书、WAF、Docker 管理、Web 终端等，单文件约 22 MB，支持导入 Lucky 配置。"
+  en:
+    name: "Gately"
+    description: "Open-source network gateway toolkit: DDNS, STUN traversal, port forwarding, reverse proxy, SSL certs, WAF, Docker management, web terminal and more in a single ~22 MB binary."
