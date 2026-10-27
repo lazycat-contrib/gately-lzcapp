@@ -35,7 +35,6 @@ application:
 
         if (username) ctx.flow.set("gately_pending_username", username);
         if (password) ctx.flow.set("gately_pending_password", password);
-
     # response: commit only after a successful login / credential change.
     - id: gately-commit-credentials
       auth_required: false
@@ -54,7 +53,6 @@ application:
         if (typeof password === "string" && password.length > 0) {
           ctx.persist.set("gately.password", password);
         }
-
     # A successful logout forgets the remembered password.
     - id: gately-forget-on-logout
       auth_required: false
@@ -63,7 +61,6 @@ application:
         - /api/logout
       do: |
         ctx.persist.del("gately.password");
-
     # browser: fill the login form (Element Plus inputs carry standard
     # autocomplete attributes) and submit it automatically.
     - id: gately-login-autofill
@@ -87,8 +84,8 @@ application:
 services:
   gately:
     # 官方商店交付（delivery.mode=lazycat）时由 Action 转存到懒猫镜像源并改写此行
-    # upstream: ghcr.io/wangwanjie/gately:v0.5.8
-    image: registry.lazycat.cloud/czyt/wangwanjie/gately:5d1b5c91a9c2015a
+    # upstream: ghcr.io/wangwanjie/gately:v0.5.9
+    image: registry.lazycat.cloud/czyt/wangwanjie/gately:1833c2d655f87d6b
     # host 网络：端口转发、STUN 穿透、Web 服务需要直接监听宿主机端口
     network_mode: host
     environment:
