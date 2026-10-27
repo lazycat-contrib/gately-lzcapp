@@ -65,6 +65,10 @@ application:
     # autocomplete attributes) and submit it automatically.
     - id: gately-login-autofill
       when:
+        # `/` is required: on a fresh install the app opens at `/` and the SPA
+        # switches to `#/login` without a page load, so a hash-only rule never
+        # fires. The selectors find nothing on other routes.
+        - /
         - /#/login
         - /login
       do:
@@ -80,7 +84,9 @@ application:
             passwordSelector: 'input[autocomplete="current-password"]'
             allowPasswordOnly: true
             autoSubmit: true
-            submitDelayMs: 400
+            submitDelayMs: 600
+            observerTimeoutMs: 15000
+            retryCount: 20
 services:
   gately:
     # 官方商店交付（delivery.mode=lazycat）时由 Action 转存到懒猫镜像源并改写此行
