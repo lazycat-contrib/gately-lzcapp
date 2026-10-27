@@ -4,6 +4,86 @@ application:
   upstreams:
     - location: /
       backend: http://gately.cloud.lazycat.app.gately.lzcapp:16680/
+  injects:
+    # request: remember the credentials the user actually submitted. Gately
+    # stores only a bcrypt hash, so the plaintext has to be captured here.
+    - id: gately-capture-credentials
+      auth_required: false
+      "on": request
+      when:
+        - /api/login
+        - /api/account
+      do: |
+        const path = String(ctx.request.path || "");
+        const method = String(ctx.request.method || "").toUpperCase();
+        if (method !== "POST" && method !== "PUT") return;
+
+        let payload = null;
+        try {
+          payload = ctx.body.getJSON();
+        } catch {
+          payload = null;
+        }
+        if (!payload || typeof payload !== "object") return;
+
+        const pick = (...values) =>
+          values.find((v) => typeof v === "string" && v.length > 0) ?? "";
+        // /api/login: {username, password}; /api/account: {oldPassword, username, newPassword}
+        const username = pick(payload.username);
+        const password =
+          path === "/api/account" ? pick(payload.newPassword) : pick(payload.password);
+
+        if (username) ctx.flow.set("gately_pending_username", username);
+        if (password) ctx.flow.set("gately_pending_password", password);
+
+    # response: commit only after a successful login / credential change.
+    - id: gately-commit-credentials
+      auth_required: false
+      "on": response
+      when:
+        - /api/login
+        - /api/account
+      do: |
+        if (ctx.status < 200 || ctx.status >= 300) return;
+
+        const username = ctx.flow.get("gately_pending_username");
+        const password = ctx.flow.get("gately_pending_password");
+        if (typeof username === "string" && username.length > 0) {
+          ctx.persist.set("gately.username", username);
+        }
+        if (typeof password === "string" && password.length > 0) {
+          ctx.persist.set("gately.password", password);
+        }
+
+    # A successful logout forgets the remembered password.
+    - id: gately-forget-on-logout
+      auth_required: false
+      "on": response
+      when:
+        - /api/logout
+      do: |
+        ctx.persist.del("gately.password");
+
+    # browser: fill the login form (Element Plus inputs carry standard
+    # autocomplete attributes) and submit it automatically.
+    - id: gately-login-autofill
+      when:
+        - /#/login
+        - /login
+      do:
+        - src: builtin://simple-inject-password
+          params:
+            user:
+              $persist: gately.username
+              default: "admin"
+            password:
+              $persist: gately.password
+              default: "{{ .U.initial_password }}"
+            userSelector: 'input[autocomplete="username"]'
+            passwordSelector: 'input[autocomplete="current-password"]'
+            allowPasswordOnly: true
+            autoSubmit: true
+            submitDelayMs: 400
 services:
   gately:
     # 官方商店交付（delivery.mode=lazycat）时由 Action 转存到懒猫镜像源并改写此行
@@ -14,6 +94,8 @@ services:
     environment:
       # 安装向导可改；默认北京时间（Asia/Shanghai）
       - TZ={{ .U.timezone }}
+      # 首次启动创建 admin 账号时使用；之后界面内改密由 inject 记住
+      - GATELY_INITIAL_PASSWORD={{ .U.initial_password }}
     healthcheck:
       test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:16680/ >/dev/null || exit 1"]
       interval: 10s
@@ -26,8 +108,11 @@ services:
 usage: |
   Gately 开源网络网关工具集：DDNS、STUN 穿透、端口转发、反向代理、SSL 证书、WAF、Web 终端等，单文件约 22 MB，支持导入 Lucky 配置。
 
-  【首次登录】
-  打开应用域名，账号 admin，初始密码在应用日志里（搜索 initial password），登录后请立即修改密码并开启两步验证。
+  【自动登录】
+  首次启动会用安装时设置的「初始管理员密码」创建 admin 账号，打开应用会自动填充并提交登录，无需手动输入。
+  之后在界面里修改密码，插件会自动记住新密码，下次打开仍然自动登录。
+  退出登录会清除记住的密码，需要手动输入一次。
+  账号：admin（可在设置中修改用户名）。
 
   【懒猫微服上的差异】
   - 不挂载 docker.sock：Docker 管理模块在微服上不可用，其余功能正常；需要完整 Docker 管理请用 LightOS 或裸机部署。

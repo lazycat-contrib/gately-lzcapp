@@ -8,15 +8,29 @@
 - **host 网络模式**：端口转发、STUN 穿透、Web 服务需要直接监听宿主机端口，与上游 compose 一致。
 - **配置目录**：`/lzcapp/var/gately` → 容器内 `/etc/gately`（明文 JSON，`ssl.json` 含证书私钥，备份时注意安全）。
 
-## 首次登录
+## 自动登录
 
-安装完成后打开应用域名，初始账号 `admin`，初始密码在应用日志里：
+参考懒猫官方 Jellyfin 应用的三阶段 inject 方案（`ctx.flow` → `ctx.persist` → 浏览器自动填充）：
 
-```sh
-lzc-cli project log -s gately --tail 200 | grep -i "initial password"
+| 阶段 | inject | 作用 |
+| --- | --- | --- |
+| request | `gately-capture-credentials` | 从 `POST /api/login`、`PUT /api/account` 的 JSON 里取出用户名与密码，暂存到 `ctx.flow` |
+| response | `gately-commit-credentials` | 仅在 2xx 成功时写入 `ctx.persist` |
+| response | `gately-forget-on-logout` | `/api/logout` 后清除记住的密码 |
+| browser | `gately-login-autofill` | 在 `/#/login` 自动填充并提交（`autoSubmit: true`） |
+
+初始密码来自安装向导的 `initial_password` 参数（默认随机 20 位），通过 `GATELY_INITIAL_PASSWORD` 传给容器，仅在 Gately 尚无账号时生效（上游 `internal/auth/auth.go` 的 `EnsureInitialized`）。
+
+Gately 只保存 bcrypt 哈希、不存明文，所以明文必须在登录请求经过时捕获；用户之后在界面里改密，下次打开会自动使用新密码。
+
+表单选择器用 Element Plus 渲染出的标准属性：
+
+```yaml
+userSelector: 'input[autocomplete="username"]'
+passwordSelector: 'input[autocomplete="current-password"]'
 ```
 
-或在懒猫微服管理界面查看容器日志，搜索 `initial password`。登录后请立即在「设置」中修改密码并开启两步验证。
+退出登录会清除记住的密码，之后需手动输入一次。
 
 ## 发布
 
