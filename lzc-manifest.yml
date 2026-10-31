@@ -90,8 +90,8 @@ application:
 services:
   gately:
     # 官方商店交付（delivery.mode=lazycat）时由 Action 转存到懒猫镜像源并改写此行
-    # upstream: ghcr.io/wangwanjie/gately:v0.6.1
-    image: registry.lazycat.cloud/czyt/wangwanjie/gately:8be878d6c5368c30
+    # upstream: ghcr.io/wangwanjie/gately:v0.6.2
+    image: registry.lazycat.cloud/czyt/wangwanjie/gately:73b7ec91d77f4b64
     # host 网络：端口转发、STUN 穿透、Web 服务需要直接监听宿主机端口
     network_mode: host
     environment:
